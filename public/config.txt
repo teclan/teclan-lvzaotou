@@ -1,0 +1,43 @@
+config {
+
+   base-url {
+     ip = "0.0.0.0"
+     port = 3770
+     name-space = "api/v1"
+   }
+   
+   media {
+     public = "/public"
+     downloads = "/downloads"
+     downloads-param = "filename"
+   }
+
+  ## 数据库配置项
+  db {
+    ## 数据库连接名称
+    name = "default"
+
+    ## 数据库迁移配置项
+    migration {
+      ## 应用启动时是否执行迁移
+      migrate = true
+    }
+
+    ## JDBC连接配置项
+    jdbc {
+      ## 连接驱动
+      driver   = "org.h2.Driver"
+      
+      url-template:"jdbc:h2:file:%s"
+
+      ## 数据库文件相对应用的存放路径
+      db-path      = "db/teclan-web"
+      
+      ## 用户名
+      user     = "system"
+      
+      ## 密码
+      password = "65536"
+    }
+  }
+}
