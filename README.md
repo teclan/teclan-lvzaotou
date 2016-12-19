@@ -239,12 +239,13 @@ public class Application extends RestapiApplication {
         youMediaServiceApis.initApis();
     }
 }
+
+```
 至此，你的路由已经被创建，你刚才创建的路由如下:
 ```
 GET mymedia/downloads 			单文件下载
 GET mymedia/downloads/batch 	文件夹下载（批量下载）
 POST mymedia/upload 			单文件上传
 POST mymedia/upload/batch 		多文件上传
-```
 ```
 
