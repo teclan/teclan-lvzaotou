@@ -196,8 +196,8 @@ public class DefaultMediaServiceApis extends AbstractMediaServiceApis
 ```	
 
 自定义文件访问资源:
-1、
-创建文件访问资源操作类
+
+1、创建文件访问资源操作类
 ```
 public class YouMediaServiceClassName extends AbstractMediaServiceApis
         implements MediaServiceApis {
