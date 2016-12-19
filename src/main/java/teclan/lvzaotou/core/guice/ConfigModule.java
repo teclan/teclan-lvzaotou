@@ -15,10 +15,12 @@ public class ConfigModule extends AbstractModule {
     private final String root;
 
     /**
-     * 加载项目目录下conf/的配置文件，如果找不到，则尝试classPath下的配置文件
+     * 加载项目目录下 conf/ 的配置文件，如果找不到，则尝试 classPath 下的配置文件
      * 
      * @param configFile
+     *            配置文件名称
      * @param root
+     *            配置文件的跟对象
      */
     public ConfigModule(String configFile, String root) {
         this.configFile = configFile;

@@ -9,15 +9,11 @@ import java.io.IOException;
 
 import org.apache.tools.zip.ZipEntry;
 import org.apache.tools.zip.ZipOutputStream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.inject.Singleton;
 
 @Singleton
 public class FileUtils {
-    private final Logger LOGGER = LoggerFactory.getLogger(FileUtils.class);
-
     /**
      * 压缩目录 {@code root} 至文件 {@code target}.zip
      * 

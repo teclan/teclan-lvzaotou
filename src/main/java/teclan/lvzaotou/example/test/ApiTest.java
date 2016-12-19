@@ -87,7 +87,7 @@ public class ApiTest {
 
             JSONObject object = new JSONObject();
 
-            object.put(getUrlResource(), maps);
+            object.put(getResource(), maps);
 
             new Resty().text(
                     String.format(SYS_MUTIL_RECORD_URL, getPort(),
@@ -112,11 +112,11 @@ public class ApiTest {
 
         try {
             JSONObject object = new JSONObject();
-            object.put(getUrlResource(), GSON.toJson(model));
+            object.put(getResource(), GSON.toJson(model));
 
             new Resty().text(
                     String.format(SYS_RECORD_BY_ID_URL, getPort(),
-                            getUrlResource(), model.id),
+                            getResource(), model.id),
                     put(new Content("application/json; charset=utf-8",
                             object.toString().getBytes("UTF-8"))));
         } catch (Exception e) {

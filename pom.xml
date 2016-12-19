@@ -77,7 +77,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.12</version>
+			<version>4.11</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -134,7 +134,7 @@
 							<!-- 生成的manifest中classpath的前缀，因为要把第三方jar放到lib目录下，所以classpath的前缀是lib/ -->
 							<classpathPrefix>lib/</classpathPrefix>
 							<!-- 应用的main class -->
-							<mainClass>teclan.monitor.Main</mainClass>
+							<mainClass>teclan.lvzaotou.example.Main</mainClass>
 						</manifest>
 					</archive>
 					<!-- 过滤掉不希望包含在jar中的文件 -->
@@ -153,7 +153,7 @@
 					<!-- Specifies the configuration file of the assembly plugin -->
 					<descriptors>
 						<!-- 注意这个文件，要创建正确的文件或指向正确的文件 -->
-						<descriptor>src/main/assembly/package.xml</descriptor>
+						<descriptor>src/main/resources/assembly/package.xml</descriptor>
 					</descriptors>
 				</configuration>
 				<executions>
