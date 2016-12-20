@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +36,7 @@ public class ApiTest {
     private final String DELETE_RECORD_BY_ID_URL        = "http://localhost:%d/%s/delete/%d";
     private final String DELETE_MUTIL_RECORD_BY_IDS_URL = "http://localhost:%d/%s/deletes/%s";
 
-    @Test
+    // @Test
     public void deleteMutilById() {
         Resty resty = new Resty();
         try {
@@ -51,7 +50,7 @@ public class ApiTest {
 
     }
 
-    @Test
+    // @Test
     public void deleteById() {
         Resty resty = new Resty();
         try {
@@ -62,7 +61,7 @@ public class ApiTest {
 
     }
 
-    @Test
+    // @Test
     public void sysMutilRecord() {
 
         ContentModel model1 = new ContentModel();
@@ -99,7 +98,7 @@ public class ApiTest {
         }
     }
 
-    @Test
+    // @Test
     public void sysById() {
 
         ContentModel model = new ContentModel();
@@ -125,7 +124,7 @@ public class ApiTest {
         }
     }
 
-    @Test
+    // @Test
     public void newWithPut() {
         ContentModel model = new ContentModel();
 
@@ -149,7 +148,7 @@ public class ApiTest {
         }
     }
 
-    @Test
+    // @Test
     public void newWithPost() {
         try {
             new Resty().text(
@@ -161,7 +160,7 @@ public class ApiTest {
         }
     }
 
-    @Test
+    // @Test
     public void fetchWithQuery() {
         try {
             LOGGER.info("{}",
@@ -185,7 +184,7 @@ public class ApiTest {
         }
     }
 
-    @Test
+    // @Test
     public void getAll() {
         try {
             JSONObject json = new Resty().json(
@@ -205,7 +204,7 @@ public class ApiTest {
         }
     }
 
-    @Test
+    // @Test
     public void fectById() {
         try {
             String json = new Resty().json(String.format(FETCH_BY_ID_URL,

@@ -5,9 +5,9 @@
 	<groupId>teclan.lvzaotou</groupId>
 	<artifactId>teclan-lvzaotou</artifactId>
 	<version>0.1.0</version>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 
-	<name>teclan-web</name>
+	<name>teclan.lvzaotou</name>
 	<url>http://maven.apache.org</url>
 
 
@@ -16,6 +16,12 @@
 			<groupId>org.javalite</groupId>
 			<artifactId>activejdbc</artifactId>
 			<version>1.4.11</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<!-- 用于文件压缩 -->
 		<dependency>
@@ -52,6 +58,12 @@
 			<groupId>com.zaxxer</groupId>
 			<artifactId>HikariCP</artifactId>
 			<version>2.4.6</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.flywaydb</groupId>
@@ -62,6 +74,12 @@
 			<groupId>com.sparkjava</groupId>
 			<artifactId>spark-core</artifactId>
 			<version>2.5</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>commons-fileupload</groupId>
@@ -153,7 +171,7 @@
 					<!-- Specifies the configuration file of the assembly plugin -->
 					<descriptors>
 						<!-- 注意这个文件，要创建正确的文件或指向正确的文件 -->
-						<descriptor>src/main/resources/assembly/package.xml</descriptor>
+						<descriptor>src/main/assembly/package.xml</descriptor>
 					</descriptors>
 				</configuration>
 				<executions>
