@@ -2,6 +2,7 @@ package teclan.lvzaotou.core;
 
 import static spark.Spark.after;
 import static spark.Spark.before;
+import static spark.Spark.halt;
 import static spark.Spark.ipAddress;
 import static spark.Spark.port;
 import static spark.Spark.staticFiles;
@@ -9,14 +10,21 @@ import static spark.Spark.threadPool;
 
 import java.io.File;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
+import spark.Request;
 import spark.servlet.SparkApplication;
 import teclan.lvzaotou.core.db.Database;
 import teclan.lvzaotou.core.service.media.MediaServiceApis;
+import teclan.lvzaotou.example.model.User;
 
 public abstract class RestapiApplication implements SparkApplication {
+    private final Logger     LOGGER     = LoggerFactory
+            .getLogger(RestapiApplication.class);
     @Inject
     @Named("config.server.ip")
     private String           host;
@@ -35,6 +43,18 @@ public abstract class RestapiApplication implements SparkApplication {
     @Inject
     @Named("config.server.time-out-millis")
     private int              timeOutMillis;
+
+    @Inject
+    @Named("config.server.authenticate.enabled")
+    private boolean          enabled;
+
+    @Inject
+    @Named("config.server.authenticate.access-user")
+    private String           accessUser;
+
+    @Inject
+    @Named("config.server.authenticate.access-token")
+    private String           accessToken;
 
     @Inject
     private Database         database;
@@ -81,11 +101,20 @@ public abstract class RestapiApplication implements SparkApplication {
     }
 
     public void filter() {
+
         before((request, response) -> {
-            database.openDatabase();
+            if (!database.hasConnect()) {
+                database.openDatabase();
+            }
+            if (enabled && !authenticate(request)) {
+                halt(401);
+            }
         });
+
         after((request, response) -> {
-            database.closeDatabase();
+            if (database.hasConnect()) {
+                database.closeDatabase();
+            }
         });
     }
 
@@ -96,4 +125,29 @@ public abstract class RestapiApplication implements SparkApplication {
 
         return dir;
     }
+
+    private boolean authenticate(Request request) {
+
+        if (request.url().contains("/login")
+                || request.url().contains("/sign-in")
+                || request.url().contains("/sign-up")) {
+            return true;
+        }
+
+        if (request.headers(accessUser) == null
+                || request.headers(accessToken) == null) {
+            return false;
+        }
+
+        User user = User.findFirst("username = ?", request.headers(accessUser));
+
+        if (user == null || !user.getString("token")
+                .equals(request.headers(accessToken))) {
+            LOGGER.warn("\n用户 {} 认证失败，尝试访问URL {}", request.headers(accessUser),
+                    request.url());
+            return false;
+        }
+        return true;
+    }
+
 }

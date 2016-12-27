@@ -1,4 +1,4 @@
-package teclan.lvzaotou.core.service;
+package teclan.lvzaotou.core.api.achieve;
 
 import static spark.Spark.delete;
 import static spark.Spark.get;
@@ -17,6 +17,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
+import teclan.lvzaotou.core.api.ServiceApis;
 import teclan.lvzaotou.core.service.db.ActiveJdbcService;
 import teclan.lvzaotou.core.service.db.ActiveRecord;
 import teclan.lvzaotou.core.utils.GsonUtils;
@@ -53,7 +54,11 @@ public abstract class AbstractServiceApis<T extends ActiveRecord>
         deleteById();
 
         deleteBatch();
+
+        customizeApis();
     }
+
+    protected abstract void customizeApis();
 
     /**
      * GET请求

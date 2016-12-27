@@ -3,7 +3,7 @@ package teclan.lvzaotou.core.service.media;
 import java.io.File;
 import java.util.List;
 
-import teclan.lvzaotou.core.service.AbstractMediaServiceApis;
+import teclan.lvzaotou.core.api.achieve.AbstractMediaServiceApis;
 
 public class DefaultMediaServiceApis extends AbstractMediaServiceApis
         implements MediaServiceApis {

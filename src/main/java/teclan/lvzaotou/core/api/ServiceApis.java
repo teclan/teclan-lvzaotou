@@ -1,4 +1,4 @@
-package teclan.lvzaotou.core.service;
+package teclan.lvzaotou.core.api;
 
 public interface ServiceApis {
 

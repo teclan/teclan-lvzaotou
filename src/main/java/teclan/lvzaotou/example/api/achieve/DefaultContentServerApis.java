@@ -2,7 +2,7 @@ package teclan.lvzaotou.example.api.achieve;
 
 import com.google.inject.Inject;
 
-import teclan.lvzaotou.core.service.AbstractServiceApis;
+import teclan.lvzaotou.core.api.achieve.AbstractServiceApis;
 import teclan.lvzaotou.core.service.db.ActiveJdbcService;
 import teclan.lvzaotou.example.api.ContentServerApis;
 import teclan.lvzaotou.example.model.ContentRecord;
@@ -22,6 +22,12 @@ public class DefaultContentServerApis extends AbstractServiceApis<ContentRecord>
     @Override
     public String getResource() {
         return "contents";
+    }
+
+    @Override
+    protected void customizeApis() {
+        // TODO Auto-generated method stub
+
     }
 
 }
