@@ -35,7 +35,32 @@ public abstract class AbstractServiceApis<T extends ActiveRecord>
 
     @Override
     public void initApis() {
-        // 查询所有
+
+        all();
+
+        findById();
+
+        fetch();
+
+        addWithPost();
+
+        addWithPut();
+
+        sysById();
+
+        sysBatch();
+
+        deleteById();
+
+        deleteBatch();
+    }
+
+    /**
+     * GET请求
+     * </p>
+     * 查询所有
+     */
+    protected void all() {
         get(getUrlPrefix() + "/all", (request, response) -> {
             List<T> results = getService().all();
             if (results != null && !results.isEmpty()) {
@@ -45,8 +70,14 @@ public abstract class AbstractServiceApis<T extends ActiveRecord>
                 return new JSONObject();
             }
         });
+    }
 
-        // 按id查询
+    /**
+     * GET请求
+     * </p>
+     * 按id查询
+     */
+    protected void findById() {
         get(getUrlPrefix() + "/fetch/:id", (request, response) -> {
             long id = Long.valueOf(request.params(":id"));
             T record = getService().findById(id);
@@ -57,19 +88,27 @@ public abstract class AbstractServiceApis<T extends ActiveRecord>
                 return new JSONObject();
             }
         });
+    }
 
-        /*
-         * 分页查询
-         * page 从 1 开始，如果 page = all 则忽略所有条件，查询所有
-         * 支持条件查询，所有条件包装在参数中的 condition 字段，json对象形式存放
-         * 如果查询结果正确，结果信息中有一下字段：
-         * date : 记录列表信息
-         * mate : 返回结果头信息，mate包含以下字段
-         * total : 满足当前条件的所有记录条数
-         * offset : 当前是第几页
-         * limit : 每页多少条记录
-         * pages : 总共有多少页
-         */
+    /**
+     * POST请求
+     * </p>
+     * 分页查询
+     * </p>
+     * page 从 1 开始，如果 page = all 则忽略所有条件，查询所有
+     * </p>
+     * 支持条件查询，所有条件包装在参数中的 condition 字段，json对象形式存放
+     * 如果查询结果正确，结果信息中有以下字段：
+     * date : 记录列表信息
+     * mate : 返回结果头信息
+     * </p>
+     * 其中mate包含以下字段
+     * total : 满足当前条件的所有记录条数
+     * offset : 当前是第几页
+     * limit : 每页多少条记录
+     * pages : 总共有多少页
+     */
+    protected void fetch() {
         post(getUrlPrefix() + "/fetch", (request, response) -> {
             if ("all".equals(request.queryParams("page"))) {
 
@@ -115,8 +154,14 @@ public abstract class AbstractServiceApis<T extends ActiveRecord>
                         .toJson();
             }
         });
+    }
 
-        // 添加记录
+    /**
+     * POST请求
+     * </p>
+     * 添加记录
+     */
+    protected void addWithPost() {
         post(getUrlPrefix() + "/new", (request, response) -> {
 
             Object[] params = request.queryParams().toArray();
@@ -131,8 +176,14 @@ public abstract class AbstractServiceApis<T extends ActiveRecord>
             getService().create(attributes);
             return request.body();
         });
+    }
 
-        // 添加记录
+    /**
+     * PUT请求
+     * </p>
+     * 添加记录
+     */
+    protected void addWithPut() {
         put(getUrlPrefix() + "/new", (request, response) -> {
 
             LOGGER.info(request.body());
@@ -143,8 +194,14 @@ public abstract class AbstractServiceApis<T extends ActiveRecord>
             getService().create(attributes);
             return request.body();
         });
+    }
 
-        // 指定 id 更新记录
+    /**
+     * PUT请求
+     * </p>
+     * 指定 id 更新记录
+     */
+    protected void sysById() {
         put(getUrlPrefix() + "/sys/:id", (request, response) -> {
             long id = Long.valueOf(request.params(":id"));
             Map<String, Object> attributes = GsonUtils
@@ -158,8 +215,14 @@ public abstract class AbstractServiceApis<T extends ActiveRecord>
                 return new JSONObject();
             }
         });
+    }
 
-        // 批量更新记录
+    /**
+     * PUT请求
+     * </p>
+     * 批量更新记录
+     */
+    protected void sysBatch() {
         put(getUrlPrefix() + "/sys", (request, response) -> {
             List<Map<String, Object>> maps = GsonUtils.fromJson(request.body(),
                     getResource(), new TypeToken<List<Map<String, Object>>>() {
@@ -174,16 +237,29 @@ public abstract class AbstractServiceApis<T extends ActiveRecord>
                 return new JSONObject();
             }
         });
+    }
 
-        // 指定 id 删除记录
+    /**
+     * DELETE请求
+     * </p>
+     * 指定id删除记录
+     */
+    protected void deleteById() {
         delete(getUrlPrefix() + "/delete/:id", (request, response) -> {
             long id = Long.valueOf(request.params(":id"));
             getService().delete(id);
             return new JSONObject();
         });
+    }
 
-        // 批量删除记录
-        // 如果 ids 不存在，将删除所有记录
+    /**
+     * DELETE请求
+     * </p>
+     * 批量删除记录
+     * </p>
+     * 如果 ids 不存在，将删除所有记录
+     */
+    protected void deleteBatch() {
         delete(getUrlPrefix() + "/deletes/:ids", (request, response) -> {
             String[] ids = null;
             if (request.params("ids") == null) {

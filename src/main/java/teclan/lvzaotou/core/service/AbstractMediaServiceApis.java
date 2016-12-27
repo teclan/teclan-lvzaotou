@@ -52,7 +52,21 @@ public abstract class AbstractMediaServiceApis implements ServiceApis {
     @Override
     public void initApis() {
 
-        // filename 的值即为需要下载的文件
+        downloads();
+
+        downloadsWithBatch();
+
+        upload();
+
+        uploadWithBatch();
+    }
+
+    /**
+     * GET请求 文件下载
+     * </p>
+     * filename 的值即为需要下载的文件
+     */
+    protected void downloads() {
         get(getUrlPrefix() + "/downloads", (request, response) -> {
             try {
                 String fileName = request.queryParams(getDownloadsParam());
@@ -80,10 +94,17 @@ public abstract class AbstractMediaServiceApis implements ServiceApis {
             }
             return new JSONObject();
         });
+    }
 
-        /**
-         * 批量下载文件，下载 fileName 目录下的所有文件，文件名为 fileName.zip
-         */
+    /**
+     * GET 请求
+     * </p>
+     * filename 的值即为需要下载的文件
+     * </p>
+     * 批量下载文件，下载 fileName 目录下的所有文件，文件名为 fileName.zip
+     */
+    protected void downloadsWithBatch() {
+
         get(getUrlPrefix() + "/downloads/batch", (request, response) -> {
             try {
                 String fileName = request.queryParams(getDownloadsParam());
@@ -115,7 +136,14 @@ public abstract class AbstractMediaServiceApis implements ServiceApis {
             }
             return new JSONObject();
         });
+    }
 
+    /**
+     * POST请求
+     * </p>
+     * 单文件上传
+     */
+    protected void upload() {
         post(getUrlPrefix() + "/upload", (request, response) -> {
 
             request.attribute("org.eclipse.jetty.multipartConfig",
@@ -137,7 +165,14 @@ public abstract class AbstractMediaServiceApis implements ServiceApis {
 
             return new JSONObject();
         });
+    }
 
+    /**
+     * POST请求
+     * </p>
+     * 上传多个文件
+     */
+    protected void uploadWithBatch() {
         post(getUrlPrefix() + "/upload/batch", (request, response) -> {
 
             request.attribute("org.eclipse.jetty.multipartConfig",
