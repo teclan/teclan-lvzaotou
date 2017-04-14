@@ -15,4 +15,6 @@ last_action			varchar(30),
 created_at        	TIMESTAMP,
 updated_at        	TIMESTAMP
 );
-insert into users (username,password,role,realname,contact,email) values ('teclan','123456','security','Teclan','010-547103','teclan@gmail.com');
+insert into users (username,password,role,realname,contact,email) values ('system','123456','system','Teclan','010-547103','teclan@gmail.com');
+insert into users (username,password,role,realname,contact,email) values ('security','123456','security','Teclan','010-547103','teclan@gmail.com');
+insert into users (username,password,role,realname,contact,email) values ('audit','123456','audit','Teclan','010-547103','teclan@gmail.com');
