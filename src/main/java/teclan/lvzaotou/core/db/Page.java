@@ -43,7 +43,7 @@ public class Page<T extends ActiveRecord> {
         meta.put("total", total);
         meta.put("offset", offset);
         meta.put("limit", limit);
-        meta.put("pages", Math.ceil(total / limit));
+        meta.put("pages", Math.ceil(total * 1.0 / limit));
 
         map.put("meta", meta);
 

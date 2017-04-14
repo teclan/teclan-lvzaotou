@@ -32,7 +32,7 @@ public abstract class AbstractServiceApis<T extends ActiveRecord>
 
     @Inject
     @Named("config.server.name-space")
-    private String       nameSpace;
+    private String nameSpace;
 
     @Override
     public void initApis() {
@@ -102,16 +102,10 @@ public abstract class AbstractServiceApis<T extends ActiveRecord>
      * </p>
      * page 从 1 开始，如果 page = all 则忽略所有条件，查询所有
      * </p>
-     * 支持条件查询，所有条件包装在参数中的 condition 字段，json对象形式存放
-     * 如果查询结果正确，结果信息中有以下字段：
-     * date : 记录列表信息
-     * mate : 返回结果头信息
+     * 支持条件查询，如果查询结果正确，结果信息中有以下字段： date : 记录列表信息 mate : 返回结果头信息
      * </p>
-     * 其中mate包含以下字段
-     * total : 满足当前条件的所有记录条数
-     * offset : 当前是第几页
-     * limit : 每页多少条记录
-     * pages : 总共有多少页
+     * 其中mate包含以下字段 total : 满足当前条件的所有记录条数 offset : 当前是第几页 limit : 每页多少条记录 pages
+     * : 总共有多少页
      */
     protected void fetch() {
         post(getUrlPrefix() + "/fetch", (request, response) -> {
@@ -150,7 +144,7 @@ public abstract class AbstractServiceApis<T extends ActiveRecord>
 
                 }
 
-                if (paramsMap != null) {
+                if (!paramsMap.isEmpty() && paramsMap != null) {
                     query = generateQuery(paramsMap);
                     parameters = generateParameters(paramsMap);
                 }
@@ -231,8 +225,8 @@ public abstract class AbstractServiceApis<T extends ActiveRecord>
         put(getUrlPrefix() + "/sys", (request, response) -> {
             List<Map<String, Object>> maps = GsonUtils.fromJson(request.body(),
                     getResource(), new TypeToken<List<Map<String, Object>>>() {
-                        private static final long serialVersionUID = 3731405824720413383L;
-                    }.getType());
+                private static final long serialVersionUID = 3731405824720413383L;
+            }.getType());
 
             List<T> results = getService().sync(maps);
             if (results != null && !results.isEmpty()) {
