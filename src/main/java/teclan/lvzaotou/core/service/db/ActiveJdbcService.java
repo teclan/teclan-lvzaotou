@@ -27,6 +27,6 @@ public interface ActiveJdbcService<T extends ActiveRecord> {
 
     public List<T> sync(List<Map<String, Object>> maps);
 
-    public List<T> sync(long id, Map<String, Object> attributes);
+    public T sync(long id, Map<String, Object> attributes);
 
 }

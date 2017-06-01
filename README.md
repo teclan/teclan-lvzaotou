@@ -136,19 +136,19 @@ public class Application extends RestapiApplication {
 ```
 GET contents/all 				查询 content_records 表所有记录
 
-GET contents/fetch/:id  		指定 id 查询 content_records 表记录
+GET contents/:id  		指定 id 查询 content_records 表记录
 
-POST contents/fetch  			分页查询 content_records 表记录，可选参数 page，limit，以及其他 content_records 包含的字段和以及对应的查询参数
+POST contents			分页查询 content_records 表记录，可选参数 page，limit，以及其他 content_records 包含的字段和以及对应的查询参数
 
-POST contents/new  				添加记录，指定的 id 字段会被忽略
+POST contents 				添加记录，指定的 id 字段会被忽略
 
-PUT contents/new  				添加记录，指定的 id 字段会被忽略
+PUT contents				添加记录，指定的 id 字段会被忽略
 
-PUT contents/sys/:id 			指定 id 更新记录
+PUT contents/:id 			指定 id 更新记录
 
-PUT contents/sys  				批量更新记录
+PUT contents/sys		    批量更新记录
 
-DELTE contents/delete/:id  		删除指定 id 对应的记录
+DELTE contents/:id  		删除指定 id 对应的记录
 
 DELETE contents/deletes/:ids 	删除多条记录，ids：id列表，逗号隔开
 

@@ -25,307 +25,345 @@ import us.monoid.json.JSONArray;
 import us.monoid.json.JSONException;
 import us.monoid.json.JSONObject;
 
-public abstract class AbstractServiceApis<T extends ActiveRecord>
-        implements ServiceApis {
-    private final Logger LOGGER = LoggerFactory
-            .getLogger(AbstractServiceApis.class);
+public abstract class AbstractServiceApis<T extends ActiveRecord> implements ServiceApis {
+	private final Logger LOGGER = LoggerFactory.getLogger(AbstractServiceApis.class);
 
-    @Inject
-    @Named("config.server.name-space")
-    private String nameSpace;
+	@Inject
+	@Named("config.server.name-space")
+	private String nameSpace;
+	@Inject
+	@Named("config.model.start-with")
+	private String startWith;
+	@Inject
+	@Named("config.model.end-with")
+	private String endWith;
 
-    @Override
-    public void initApis() {
+	@Override
+	public void initApis() {
 
-        all();
+		all();
 
-        findById();
+		findById();
 
-        fetch();
+		fetch();
 
-        addWithPost();
+		createWithPost();
 
-        addWithPut();
+		ceateWitPut();
 
-        sysById();
+		sysById();
 
-        sysBatch();
+		sysBatch();
 
-        deleteById();
+		deleteById();
 
-        deleteBatch();
+		deleteBatch();
 
-        customizeApis();
-    }
+		customizeApis();
+	}
 
-    protected abstract void customizeApis();
+	protected abstract void customizeApis();
 
-    /**
-     * GET请求
-     * </p>
-     * 查询所有
-     */
-    protected void all() {
-        get(getUrlPrefix() + "/all", (request, response) -> {
-            List<T> results = getService().all();
-            if (results != null && !results.isEmpty()) {
-                return generateResult(results).toString();
-            } else {
-                LOGGER.warn("\n无查询结果 {}", getResource() + "/all");
-                return new JSONObject();
-            }
-        });
-    }
+	/**
+	 * GET请求
+	 * </p>
+	 * 查询所有
+	 */
+	protected void all() {
+		get(getUrlPrefix(), (request, response) -> {
+			List<T> results = getService().all();
+			
+			if (results != null && !results.isEmpty()) {
+				return generateResult(results).toString();
+			} else {
+				LOGGER.warn("\n无查询结果 {}", getResource() + "/all");
+				return new JSONObject();
+			}
+		});
+	}
 
-    /**
-     * GET请求
-     * </p>
-     * 按id查询
-     */
-    protected void findById() {
-        get(getUrlPrefix() + "/fetch/:id", (request, response) -> {
-            long id = Long.valueOf(request.params(":id"));
-            T record = getService().findById(id);
-            if (record != null) {
-                return generateResult(record);
-            } else {
-                LOGGER.warn("\n无查询结果 {}", getResource() + "/fetch/" + id);
-                return new JSONObject();
-            }
-        });
-    }
+	public void findById() {
+		get(getUrlPrefix() + "/:id", (request, response) -> {
 
-    /**
-     * POST请求
-     * </p>
-     * 分页查询
-     * </p>
-     * page 从 1 开始，如果 page = all 则忽略所有条件，查询所有
-     * </p>
-     * 支持条件查询，如果查询结果正确，结果信息中有以下字段： date : 记录列表信息 mate : 返回结果头信息
-     * </p>
-     * 其中mate包含以下字段 total : 满足当前条件的所有记录条数 offset : 当前是第几页 limit : 每页多少条记录 pages
-     * : 总共有多少页
-     */
-    protected void fetch() {
-        post(getUrlPrefix() + "/fetch", (request, response) -> {
-            if ("all".equals(request.queryParams("page"))) {
+			String rsp = getService().findById(Long.valueOf(request.params(":id"))).toJson(getResource());
+			return rsp;
+		});
+	}
 
-                List<T> results = getService().all();
-                if (results != null && !results.isEmpty()) {
-                    return generateResult(results);
-                } else {
-                    LOGGER.warn("\n无查询结果 {}", getResource() + "/all");
-                    return new JSONObject();
-                }
+	protected void fetch() {
+		get(getUrlPrefix(), (request, response) -> {
+			int page = 1;
+			int limit = 20;
+			String query = "1 = ?";
+			Object[] parameters = new Object[] { 1 };
+			if (request.queryParams("page") != null) {
+				page = Integer.valueOf(request.queryParams("page"));
+			}
+			if (request.queryParams("limit") != null) {
+				limit = Integer.valueOf(request.queryParams("limit"));
+			}
 
-            } else {
-                int page = 1;
-                int limit = 10;
-                String query = "1 = ?";
-                Object[] parameters = new Object[] { 1 };
-                if (request.queryParams("page") != null) {
-                    page = Integer.valueOf(request.queryParams("page"));
-                }
-                if (request.queryParams("limit") != null) {
-                    limit = Integer.valueOf(request.queryParams("limit"));
-                }
+			Object[] params = request.queryParams().toArray();
 
-                Object[] params = request.queryParams().toArray();
+			Map<String, String> paramsMap = new LinkedHashMap<String, String>();
 
-                Map<String, String> paramsMap = new LinkedHashMap<String, String>();
+			for (Object param : params) {
+				if ("page".equals(param) || "limit".equals(param)) {
+					continue;
+				}
+				paramsMap.put((String) param, request.queryParams((String) param));
 
-                for (Object param : params) {
-                    if ("page".equals(param) || "limit".equals(param)) {
-                        continue;
-                    }
-                    paramsMap.put((String) param,
-                            request.queryParams((String) param));
+			}
 
-                }
+			if (paramsMap != null && !paramsMap.isEmpty()) {
 
-                if (!paramsMap.isEmpty() && paramsMap != null) {
-                    query = generateQuery(paramsMap);
-                    parameters = generateParameters(paramsMap);
-                }
+				if (hasKey(startWith(),paramsMap) 
+						&& hasKey(endWith(),paramsMap)) {
+					query = generateQuery(paramsMap, true);
+					parameters = generateParameters(paramsMap, true);
+				} else {
+					paramsMap.remove(startWith());
+					paramsMap.remove(endWith());
 
-                return getService().fetch(page, limit, query, parameters)
-                        .toJson();
-            }
-        });
-    }
+					query = generateQuery(paramsMap, false);
+					parameters = generateParameters(paramsMap, false);
+				}
 
-    /**
-     * POST请求
-     * </p>
-     * 添加记录
-     */
-    protected void addWithPost() {
-        post(getUrlPrefix() + "/new", (request, response) -> {
+			}
 
-            Object[] params = request.queryParams().toArray();
+			String rsp = getService().fetch(page, limit, query, parameters).toJson(getResource());
 
-            Map<String, Object> attributes = new LinkedHashMap<String, Object>();
+			return rsp;
+		});
+	}
+	
+	private boolean hasKey(String key,Map<String,String> params){
+		return params.containsKey(key) && isNotNull(params.get(key));
+		
+	}
+	private boolean isNotNull(String value){
+		return !"".equals(value.trim()) || value==null;
+	}
 
-            for (Object param : params) {
-                attributes.put((String) param,
-                        request.queryParams((String) param));
-            }
+	protected void createWithPost() {
+		post(getUrlPrefix(), (request, response) -> {
+			Map<String, Object> attributes = GsonUtils
+					.toMap(new JSONObject(request.body()).get(getSingleResource()).toString());
 
-            getService().create(attributes);
-            return request.body();
-        });
-    }
+			try {
+				T created = getService().create(attributes);
+				return created.toJson(getResource());
+			} catch (Exception e) {
+				response.status(500);
+				return new JSONObject();
+			}
 
-    /**
-     * PUT请求
-     * </p>
-     * 添加记录
-     */
-    protected void addWithPut() {
-        put(getUrlPrefix() + "/new", (request, response) -> {
+		});
+	}
 
-            LOGGER.info(request.body());
-            Map<String, Object> attributes = GsonUtils
-                    .toMap(new JSONObject(request.body()).get(getResource())
-                            .toString());
+	protected void ceateWitPut() {
+		put(getUrlPrefix(), (request, response) -> {
+			Map<String, Object> attributes = GsonUtils
+					.toMap(new JSONObject(request.body()).get(getSingleResource()).toString());
 
-            getService().create(attributes);
-            return request.body();
-        });
-    }
+			try {
+				T created = getService().create(attributes);
+				return created.toJson(getResource());
+			} catch (Exception e) {
+				response.status(500);
+				return new JSONObject();
+			}
 
-    /**
-     * PUT请求
-     * </p>
-     * 指定 id 更新记录
-     */
-    protected void sysById() {
-        put(getUrlPrefix() + "/sys/:id", (request, response) -> {
-            long id = Long.valueOf(request.params(":id"));
-            Map<String, Object> attributes = GsonUtils
-                    .toMap(new JSONObject(request.body()).get(getResource())
-                            .toString());
-            List<T> results = getService().sync(id, attributes);
-            if (results != null && !results.isEmpty()) {
-                return generateResult(results);
-            } else {
-                LOGGER.warn("\n无查询结果 {}", getResource() + "/sys/" + id);
-                return new JSONObject();
-            }
-        });
-    }
+		});
+	}
 
-    /**
-     * PUT请求
-     * </p>
-     * 批量更新记录
-     */
-    protected void sysBatch() {
-        put(getUrlPrefix() + "/sys", (request, response) -> {
-            List<Map<String, Object>> maps = GsonUtils.fromJson(request.body(),
-                    getResource(), new TypeToken<List<Map<String, Object>>>() {
-                private static final long serialVersionUID = 3731405824720413383L;
-            }.getType());
+	protected void sysById() {
+		put(getUrlPrefix() + "/:id", (request, response) -> {
+			long id = Long.valueOf(request.params(":id"));
+			Map<String, Object> attributes = GsonUtils
+					.toMap(new JSONObject(request.body()).get(getSingleResource()).toString());
+			T updated = getService().sync(id, attributes);
+			if (updated != null) {
+				return updated.toJson(getResource());
+			} else {
+				response.status(500);
+				return new JSONObject();
+			}
+		});
+	}
 
-            List<T> results = getService().sync(maps);
-            if (results != null && !results.isEmpty()) {
-                return generateResult(results);
-            } else {
-                LOGGER.warn("\n无查询结果 {}", getResource() + "/sys");
-                return new JSONObject();
-            }
-        });
-    }
+	/**
+	 * PUT请求
+	 * </p>
+	 * 批量更新记录
+	 */
+	protected void sysBatch() {
+		put(getUrlPrefix() + "/sys", (request, response) -> {
+			List<Map<String, Object>> maps = GsonUtils.fromJson(request.body(), getResource(),
+					new TypeToken<List<Map<String, Object>>>() {
+				private static final long serialVersionUID = 3731405824720413383L;
+			}.getType());
 
-    /**
-     * DELETE请求
-     * </p>
-     * 指定id删除记录
-     */
-    protected void deleteById() {
-        delete(getUrlPrefix() + "/delete/:id", (request, response) -> {
-            long id = Long.valueOf(request.params(":id"));
-            getService().delete(id);
-            return new JSONObject();
-        });
-    }
+			List<T> results = getService().sync(maps);
+			if (results != null && !results.isEmpty()) {
+				return generateResult(results);
+			} else {
+				return new JSONObject();
+			}
+		});
+	}
 
-    /**
-     * DELETE请求
-     * </p>
-     * 批量删除记录
-     * </p>
-     * 如果 ids 不存在，将删除所有记录
-     */
-    protected void deleteBatch() {
-        delete(getUrlPrefix() + "/deletes/:ids", (request, response) -> {
-            String[] ids = null;
-            if (request.params("ids") == null) {
-                getService().deleteAll(ids);
-            } else {
-                ids = request.params("ids").split(",");
-                getService().deleteAll(ids);
-            }
-            return new JSONObject();
-        });
-    }
+	/**
+	 * DELETE请求
+	 * </p>
+	 * 指定id删除记录
+	 */
+	protected void deleteById() {
+		delete(getUrlPrefix() + "/:id", (request, response) -> {
+			long id = Long.valueOf(request.params(":id"));
+			getService().delete(id);
+			return new JSONObject();
+		});
+	}
 
-    public abstract String getResource();
+	/**
+	 * DELETE请求
+	 * </p>
+	 * 批量删除记录
+	 * </p>
+	 * 如果 ids 不存在，将删除所有记录
+	 */
+	protected void deleteBatch() {
+		delete(getUrlPrefix() + "/deletes/:ids", (request, response) -> {
+			String[] ids = null;
+			if (request.params("ids") == null) {
+				getService().deleteAll(ids);
+			} else {
+				ids = request.params("ids").split(",");
+				getService().deleteAll(ids);
+			}
+			return new JSONObject();
+		});
+	}
 
-    public abstract ActiveJdbcService<T> getService();
+	protected String timeColumn() {
+		return "created_at";
+	}
 
-    public String getUrlPrefix() {
-        return nameSpace + "/" + getResource();
-    }
+	public String getUrlPrefix() {
+		return nameSpace + "/" + getResource();
+	}
 
-    private String generateQuery(Map<String, String> condition) {
+	  private String generateQuery(Map<String, String> condition,
+	            boolean queryTime) {
 
-        if (condition.size() == 1) {
-            for (String key : condition.keySet()) {
-                return String.format("%s like ? ", key);
-            }
-        }
+	        List<String> columns = new ArrayList<String>();
 
-        List<String> columns = new ArrayList<String>();
+	        if (queryTime) {
 
-        for (String key : condition.keySet()) {
-            columns.add(key);
-        }
+	            for (String key : condition.keySet()) {
+	                if (!"".equals(condition.get(key).trim())
+	                        && !startWith().equals(key) && !endWith().equals(key)) {
+	                    columns.add(key);
+	                }
+	            }
 
-        return String.join(" like ? and ", columns);
-    }
+	            if (!columns.isEmpty() && columns.size() > 1) {
 
-    private Object[] generateParameters(Map<String, String> condition) {
-        Object[] parameters = new Object[condition.size()];
-        int index = 0;
-        for (String key : condition.keySet()) {
-            parameters[index] = "%" + condition.get(key) + "%";
-            index++;
-        }
-        return parameters;
-    }
+	                return String.join(" like ? and ", columns) + String
+	                        .format(" like ? and %s between ? and ?", timeColumn());
+	            } else {
+	                return columns.isEmpty()
+	                        ? String.format(" %s between ? and ?", timeColumn())
+	                        : String.format("%s like ? and  %s between ? and ?",
+	                                columns.get(0), timeColumn());
+	            }
+	        } else {
+	            for (String key : condition.keySet()) {
 
-    private JSONObject generateResult(List<T> records) {
-        JSONArray items = new JSONArray();
-        for (T t : records) {
-            items.put(t.toJson());
-        }
-        try {
-            return new JSONObject().put(getResource(), items);
-        } catch (JSONException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-        return new JSONObject();
-    }
+	                if (!"".equals(condition.get(key).trim())) {
+	                    columns.add(key);
+	                }
+	            }
 
-    private JSONObject generateResult(T record) {
-        try {
-            return new JSONObject().put(getResource(), record.toJson());
-        } catch (JSONException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-        return new JSONObject();
-    }
+	            if (columns.size() == 0) {
+	                return " 1 = ? ";
+	            }
+	            return columns.size() > 1
+	                    ? String.join(" like ? and ", columns) + " like ?"
+	                    : String.format(" %s like ?", columns.get(0));
+	        }
+	    }
+
+
+	  private Object[] generateParameters(Map<String, String> condition,
+	            boolean queryTime) {
+
+	        List<String> params = new ArrayList<String>();
+	        Object[] parameters = null;
+	        if (queryTime) {
+	            String startWith = condition.remove(startWith());
+	            String endWith = condition.remove(endWith());
+	            for (String key : condition.keySet()) {
+	                if (!"".equals(condition.get(key).trim())) {
+	                    params.add(key);
+
+	                }
+	            }
+	            parameters = new Object[params.size() + 2];
+	            int index = 0;
+	            for (String key : params) {
+	                parameters[index++] = "%" + condition.get(key) + "%";
+	            }
+	            parameters[index++] = startWith;
+	            parameters[index] = endWith;
+
+	        } else {
+
+	            for (String key : condition.keySet()) {
+	                if (!"".equals(condition.get(key).trim())) {
+	                    params.add(key);
+
+	                }
+	            }
+	            if (params.size() == 0) {
+	                return new Object[] { 1 };
+	            }
+	            parameters = new Object[params.size()];
+	            int index = 0;
+
+	            for (String key : params) {
+	                parameters[index++] = "%" + condition.get(key) + "%";
+	            }
+	        }
+	        return parameters;
+	    }
+
+	private JSONObject generateResult(List<T> records) {
+		JSONArray items = new JSONArray();
+		for (T t : records) {
+			items.put(t.toJson());
+		}
+		try {
+			return new JSONObject().put(getResource(), items);
+		} catch (JSONException e) {
+			LOGGER.error(e.getMessage(), e);
+		}
+		return new JSONObject();
+	}
+
+	private String endWith() {
+		return endWith;
+	}
+
+	private String startWith() {
+		return startWith;
+	}
+
+	public abstract String getResource();
+
+	public abstract String getSingleResource();
+
+	public abstract ActiveJdbcService<T> getService();
 
 }

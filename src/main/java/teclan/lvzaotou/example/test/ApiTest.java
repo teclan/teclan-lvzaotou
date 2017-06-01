@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -167,7 +168,7 @@ public class ApiTest {
                     new Resty()
                             .json(String.format(FETCH_WITH_QUERY_URL, getPort(),
                                     getUrlResource()), form("page=all"))
-                            .object().toString());
+                    .object().toString());
 
             LOGGER.info("\n=================");
 
@@ -175,8 +176,8 @@ public class ApiTest {
                     new Resty()
                             .json(String.format(FETCH_WITH_QUERY_URL, getPort(),
                                     getUrlResource()),
-                                    form("page=1&limit=2&content=测试"))
-                            .object().toString());
+                            form("page=1&limit=2&content=测试")).object()
+                    .toString());
 
         } catch (Exception e) {
             // TODO Auto-generated catch block
@@ -184,7 +185,7 @@ public class ApiTest {
         }
     }
 
-    // @Test
+    @Test
     public void getAll() {
         try {
             JSONObject json = new Resty().json(
