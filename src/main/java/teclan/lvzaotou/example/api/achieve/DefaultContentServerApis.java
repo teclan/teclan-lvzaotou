@@ -8,26 +8,30 @@ import teclan.lvzaotou.example.api.ContentServerApis;
 import teclan.lvzaotou.example.model.ContentRecord;
 import teclan.lvzaotou.example.service.ContentRecordService;
 
-public class DefaultContentServerApis extends AbstractServiceApis<ContentRecord>
-        implements ContentServerApis {
+public class DefaultContentServerApis extends AbstractServiceApis<ContentRecord>implements ContentServerApis {
 
-    @Inject
-    private ContentRecordService service;
+	@Inject
+	private ContentRecordService service;
 
-    @Override
-    public ActiveJdbcService<ContentRecord> getService() {
-        return service;
-    }
+	@Override
+	public ActiveJdbcService<ContentRecord> getService() {
+		return service;
+	}
 
-    @Override
-    public String getResource() {
-        return "contents";
-    }
+	@Override
+	public String getResource() {
+		return "contents";
+	}
 
-    @Override
-    protected void customizeApis() {
-        // TODO Auto-generated method stub
+	@Override
+	protected void customizeApis() {
+		// TODO Auto-generated method stub
 
-    }
+	}
+
+	@Override
+	public String getSingleResource() {
+		return "content";
+	}
 
 }

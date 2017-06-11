@@ -11,45 +11,49 @@ import teclan.lvzaotou.core.service.db.ActiveJdbcService;
 import teclan.lvzaotou.example.model.User;
 import us.monoid.json.JSONObject;
 
-public class DefaultUserServiceApis extends AbstractServiceApis<User>
-        implements UserServiceApis {
-    @Inject
-    private UserService userService;
+public class DefaultUserServiceApis extends AbstractServiceApis<User>implements UserServiceApis {
+	@Inject
+	private UserService userService;
 
-    @Override
-    public String getResource() {
-        return "users";
-    }
+	@Override
+	public String getResource() {
+		return "users";
+	}
 
-    @Override
-    public ActiveJdbcService<User> getService() {
-        return userService;
-    }
+	@Override
+	public String getSingleResource() {
+		return "user";
+	}
 
-    @Override
-    protected void customizeApis() {
-        post(getUrlPrefix() + "/login", (request, response) -> {
+	@Override
+	public ActiveJdbcService<User> getService() {
+		return userService;
+	}
 
-            String username = request.queryParams("accessUser").toString();
-            String password = request.queryParams("accessToken").toString();
+	@Override
+	protected void customizeApis() {
+		post(getUrlPrefix() + "/login", (request, response) -> {
 
-            response.body(userService.login(username, password, request.ip()));
+			String username = request.queryParams("accessUser").toString();
+			String password = request.queryParams("accessToken").toString();
 
-            if (response.body().contains("失败")) {
-                response.status(401);
-            }
-            return response.body();
-        });
+			response.body(userService.login(username, password, request.ip()));
 
-        // 退出登录
-        delete(getUrlPrefix() + "/logout/:id", (request, response) -> {
-            long id = Long.valueOf(request.params(":id"));
+			if (response.body().contains("失败")) {
+				response.status(401);
+			}
+			return response.body();
+		});
 
-            userService.logout(id, request.ip());
+		// 退出登录
+		delete(getUrlPrefix() + "/logout/:id", (request, response) -> {
+			long id = Long.valueOf(request.params(":id"));
 
-            return new JSONObject().toString();
-        });
+			userService.logout(id, request.ip());
 
-    }
+			return new JSONObject().toString();
+		});
+
+	}
 
 }
