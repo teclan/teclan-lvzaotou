@@ -9,6 +9,7 @@ import static spark.Spark.staticFiles;
 import static spark.Spark.threadPool;
 
 import java.io.File;
+import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +59,10 @@ public abstract class RestapiApplication implements SparkApplication {
 	@Inject
 	@Named("config.server.authenticate.access-token")
 	private String accessToken;
+	
+	@Inject
+	@Named("config.server.authenticate.invalid-time")
+	private int invalidTime;
 
 	@Inject
 	private Database database;
@@ -167,10 +172,17 @@ public abstract class RestapiApplication implements SparkApplication {
 		}
 
 		User user = User.findFirst("username = ?", request.headers(accessUser));
-
+		
 		if (user == null || !user.getString("token").equals(request.headers(accessToken))) {
-			LOGGER.warn("\n用户 {} 认证失败，尝试访问URL {}", request.headers(accessUser), request.url());
+			LOGGER.warn("\n用户 {} 认证失败，token 无效，尝试访问URL {}", request.headers(accessUser), request.url());
 			return false;
+		}
+		
+		long lastAction = user.getTimestamp("last_action").getTime();
+		
+		if(new Date().getTime()-lastAction>invalidTime*1000*60){
+		    LOGGER.warn("\n用户 {} 认证失败，会话超时，尝试访问URL {}", request.headers(accessUser), request.url());
+		    return false;
 		}
 		return true;
 	}

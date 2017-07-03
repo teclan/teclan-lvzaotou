@@ -11,7 +11,7 @@ description			varchar(100),
 status			    varchar(10) default('不在线'),
 ip					varchar(20),
 token				varchar(100),
-last_action			varchar(30),
+last_action			TIMESTAMP,
 created_at        	TIMESTAMP,
 updated_at        	TIMESTAMP
 );
