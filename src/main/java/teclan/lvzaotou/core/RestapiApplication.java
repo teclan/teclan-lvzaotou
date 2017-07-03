@@ -9,6 +9,8 @@ import static spark.Spark.staticFiles;
 import static spark.Spark.threadPool;
 
 import java.io.File;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.slf4j.Logger;
@@ -25,170 +27,202 @@ import spark.Request;
 import spark.servlet.SparkApplication;
 import teclan.lvzaotou.core.db.Database;
 import teclan.lvzaotou.core.service.media.MediaServiceApis;
+import teclan.lvzaotou.example.model.Permission;
 import teclan.lvzaotou.example.model.User;
 
 public abstract class RestapiApplication implements SparkApplication {
-	private final Logger LOGGER = LoggerFactory.getLogger(RestapiApplication.class);
-	@Inject
-	@Named("config.server.ip")
-	private String host;
-	@Inject
-	@Named("config.server.port")
-	private int port;
-	@Inject
-	@Named("config.media.public")
-	private String publicDir;
-	@Inject
-	@Named("config.server.max-threads")
-	private int maxThreads;
-	@Inject
-	@Named("config.server.min-threads")
-	private int minThreads = 2;
-	@Inject
-	@Named("config.server.time-out-millis")
-	private int timeOutMillis;
+	private final Logger     LOGGER     = LoggerFactory
+            .getLogger(RestapiApplication.class);
+    @Inject
+    @Named("config.server.ip")
+    private String           host;
+    @Inject
+    @Named("config.server.port")
+    private int              port;
+    @Inject
+    @Named("config.media.public")
+    private String           publicDir;
+    @Inject
+    @Named("config.server.max-threads")
+    private int              maxThreads;
+    @Inject
+    @Named("config.server.min-threads")
+    private int              minThreads = 2;
+    @Inject
+    @Named("config.server.time-out-millis")
+    private int              timeOutMillis;
 
-	@Inject
-	@Named("config.server.authenticate.enabled")
-	private boolean enabled;
+    @Inject
+    @Named("config.server.authenticate.enabled")
+    private boolean          enabled;
 
-	@Inject
-	@Named("config.server.authenticate.access-user")
-	private String accessUser;
+    @Inject
+    @Named("config.server.authenticate.access-user")
+    private String           accessUser;
 
-	@Inject
-	@Named("config.server.authenticate.access-token")
-	private String accessToken;
-	
-	@Inject
-	@Named("config.server.authenticate.invalid-time")
-	private int invalidTime;
+    @Inject
+    @Named("config.server.authenticate.access-token")
+    private String           accessToken;
 
-	@Inject
-	private Database database;
-	@Inject
-	private MediaServiceApis mediaServiceApis;
+    @Inject
+    @Named("config.server.authenticate.invalid-time")
+    private int              invalidTime;
 
-	private String env;
+    @Inject
+    private Database         database;
+    @Inject
+    private MediaServiceApis mediaServiceApis;
 
-	@Override
-	public void init() {
-		defaultConfig();
-		defaultApis();
-		creatApis();
-		filter();
-	}
+    private String           env;
+    SimpleDateFormat         DATE_FOMAT = new SimpleDateFormat(
+            "yyyy-MM-dd HH:mm:ss");
 
-	public abstract void creatApis();
+    @Override
+    public void init() {
+        defaultConfig();
+        defaultApis();
+        creatApis();
+        filter();
+    }
 
-	public void setHost(String host) {
-		this.host = host;
-	}
+    public abstract void creatApis();
 
-	public void setPort(int port) {
-		this.port = port;
-	}
+    public void setHost(String host) {
+        this.host = host;
+    }
 
-	private void defaultConfig() {
-		ipAddress(host);
-		port(port);
-		threadPool(maxThreads, minThreads, timeOutMillis);
+    public void setPort(int port) {
+        this.port = port;
+    }
 
-		initLogger(env, getClass());
+    private void defaultConfig() {
+        ipAddress(host);
+        port(port);
+        threadPool(maxThreads, minThreads, timeOutMillis);
 
-	}
+        initLogger(env, getClass());
 
-	public void initLogger(String env, Class<?> T) {
+    }
 
-		if (env == null) {
-			LOGGER.warn("\n\nHave you forget to set env for the app, " + "if you are sure to skip this,let's skip that "
-					+ "and the config on class path for logback will " + "be use!\n");
-			return;
-		}
+    public void initLogger(String env, Class<?> T) {
 
-		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+        if (env == null) {
+            LOGGER.warn("\n\nHave you forget to set env for the app, "
+                    + "if you are sure to skip this,let's skip that "
+                    + "and the config on class path for logback will "
+                    + "be use!\n");
+            return;
+        }
 
-		try {
-			JoranConfigurator configurator = new JoranConfigurator();
-			configurator.setContext(context);
-			context.reset();
-			configurator.doConfigure(String.format("environments/%s/logback.xml", env));
-			LOGGER.info("logback config on {} effective", String.format("environments/%s/logback.xml", env));
-		} catch (JoranException je) {
-			// StatusPrinter will handle this
-		}
-		StatusPrinter.printInCaseOfErrorsOrWarnings(context);
-	}
+        LoggerContext context = (LoggerContext) LoggerFactory
+                .getILoggerFactory();
 
-	private void defaultApis() {
-		defaultServiceApis();
-		defaultMediaServiceApis();
-	}
+        try {
+            JoranConfigurator configurator = new JoranConfigurator();
+            configurator.setContext(context);
+            context.reset();
+            configurator.doConfigure(
+                    String.format("environments/%s/logback.xml", env));
+            LOGGER.info("logback config on {} effective",
+                    String.format("environments/%s/logback.xml", env));
+        } catch (JoranException je) {
+            // StatusPrinter will handle this
+        }
+        StatusPrinter.printInCaseOfErrorsOrWarnings(context);
+    }
 
-	private void defaultServiceApis() {
-		// Add something
-	}
+    private void defaultApis() {
+        defaultServiceApis();
+        defaultMediaServiceApis();
+    }
 
-	private void defaultMediaServiceApis() {
-		// staticFiles.location(getPublicDir());
-		staticFiles.externalLocation(getPublicDir());
-		mediaServiceApis.initApis();
-	}
+    private void defaultServiceApis() {
+        // Add something
+    }
 
-	public void filter() {
+    private void defaultMediaServiceApis() {
+        // staticFiles.location(getPublicDir());
+        staticFiles.externalLocation(getPublicDir());
+        mediaServiceApis.initApis();
+    }
 
-		before((request, response) -> {
-			if (!database.hasConnect()) {
-				database.openDatabase();
-			}
-			if (enabled && !authenticate(request)) {
-				halt(401);
-			}
-		});
+    public void filter() {
 
-		after((request, response) -> {
-			if (database.hasConnect()) {
-				database.closeDatabase();
-			}
-		});
-	}
+        before((request, response) -> {
+            if (!database.hasConnect()) {
+                database.openDatabase();
+            }
+            if (enabled && !authenticate(request)) {
+                halt(401);
+            }
+        });
 
-	private String getPublicDir() {
-		String dir = System.getProperty("user.dir") + File.separator + publicDir;
-		new File(dir).mkdirs();
+        after((request, response) -> {
+            if (database.hasConnect()) {
+                database.closeDatabase();
+            }
+        });
+    }
 
-		return dir;
-	}
+    private String getPublicDir() {
+        String dir = System.getProperty("user.dir") + File.separator
+                + publicDir;
+        new File(dir).mkdirs();
 
-	private boolean authenticate(Request request) {
+        return dir;
+    }
 
-		if (request.url().contains("/login") || request.url().contains("/sign-in")
-				|| request.url().contains("/sign-up")) {
-			return true;
-		}
+    private boolean authenticate(Request request) {
 
-		if (request.headers(accessUser) == null || request.headers(accessToken) == null) {
-			return false;
-		}
+        if (request.url().contains("/login")
+                || request.url().contains("/sign-in")
+                || request.url().contains("/sign-up")
+                || request.url().contains("/sign-out")) {
+            return true;
+        }
 
-		User user = User.findFirst("username = ?", request.headers(accessUser));
-		
-		if (user == null || !user.getString("token").equals(request.headers(accessToken))) {
-			LOGGER.warn("\n用户 {} 认证失败，token 无效，尝试访问URL {}", request.headers(accessUser), request.url());
-			return false;
-		}
-		
-		long lastAction = user.getTimestamp("last_action").getTime();
-		
-		if(new Date().getTime()-lastAction>invalidTime*1000*60){
-		    LOGGER.warn("\n用户 {} 认证失败，会话超时，尝试访问URL {}", request.headers(accessUser), request.url());
-		    return false;
-		}
-		return true;
-	}
+        if (request.headers(accessUser) == null
+                || request.headers(accessToken) == null) {
+            return false;
+        }
 
-	public void setEnv(String env) {
-		this.env = env;
-	}
+        User user = User.findFirst("username = ?", request.headers(accessUser));
+
+        if (user == null || !user.getString("token")
+                .equals(request.headers(accessToken))) {
+            LOGGER.warn("\n用户 {} 认证失败，token 无效，尝试访问URL {}",
+                    request.headers(accessUser), request.url());
+            return false;
+        }
+
+        long lastAction = 0;
+
+        try {
+            lastAction = DATE_FOMAT.parse(user.getString("last_action"))
+                    .getTime();
+        } catch (ParseException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+        if (new Date().getTime() - lastAction > invalidTime * 1000 * 60) {
+            LOGGER.warn("\n用户 {} 认证失败，会话超时，尝试访问URL {}",
+                    request.headers(accessUser), request.url());
+            return false;
+        }
+
+        String role = user.getString("role");
+
+        if (Permission.findFirst("role = ? and permisson = ?", role, request
+                .url().substring(0, request.url().lastIndexOf("/"))) == null) {
+            LOGGER.warn("\n用户 {} 认证失败，无访问资源权限，尝试访问URL {}",
+                    request.headers(accessUser), request.url());
+            return false;
+        }
+
+        return true;
+    }
+
+    public void setEnv(String env) {
+        this.env = env;
+    }
 
 }

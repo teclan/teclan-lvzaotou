@@ -77,4 +77,31 @@ public class DefaultUserService extends AbstracActiveJdbcService<User>
         return null;
     }
 
+    public String password(String username, String oldPwd, String newPwd,
+            String ip) {
+
+        User user = User.findFirst("username = ? ", username);
+
+        if (user != null) {
+
+            if (user.getString("password").equals(oldPwd)) {
+                user.set("status", "不在线", "password", newPwd, "token", "", "ip",
+                        ip, "last_action",
+                        DATE_FOMAT.format(Calendar.getInstance().getTime()))
+                        .saveIt();
+
+                LOGGER.debug("密码修改成功，用户名：{}，角色：{}，ip：{}", username,
+                        user.getString("role").toString(), ip);
+
+                return new JsonObject().toString();
+            } else {
+                LOGGER.debug("密码修改失败，原密码错误，用户名：{},角色：{}", username,
+                        user.getString("role").toString());
+                return null;
+            }
+        }
+
+        LOGGER.debug("密码修改失败，用户{} 不存在", username);
+        return null;
+    }
 }

@@ -12,4 +12,6 @@ public interface UserService extends ActiveJdbcService<User> {
     public String login(String username, String password, String ip);
 
     public String logout(long id, String ip);
+    
+    public String password(String username,String oldPwd,String newPwd,String ip);
 }

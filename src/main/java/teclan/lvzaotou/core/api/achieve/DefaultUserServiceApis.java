@@ -34,8 +34,8 @@ public class DefaultUserServiceApis extends AbstractServiceApis<User>implements 
 	protected void customizeApis() {
 		post(getUrlPrefix() + "/login", (request, response) -> {
 
-			String username = request.queryParams("accessUser").toString();
-			String password = request.queryParams("accessToken").toString();
+			String username = request.queryParams("username").toString();
+			String password = request.queryParams("password").toString();
 
 			response.body(userService.login(username, password, request.ip()));
 
@@ -53,6 +53,22 @@ public class DefaultUserServiceApis extends AbstractServiceApis<User>implements 
 
 			return new JSONObject().toString();
 		});
+		
+		// 修改密码
+        post(getUrlPrefix() + "/password", (request, response) -> {
+
+            String username = request.queryParams("user").toString();
+            String oldPwd = request.queryParams("old-password").toString();
+            String newPwd = request.queryParams("new-password").toString();
+            
+           if( userService.password(username, oldPwd, newPwd, request.ip())==null){
+               response.status(500);
+           }else{
+               response.status(200);
+           }
+
+            return new JSONObject().toString();
+        });
 
 	}
 
