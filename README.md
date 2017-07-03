@@ -1,4 +1,25 @@
 
+## 需要修改的配置
+
+### startup.sh
+
+```
+47    echo $! > $app_home/bin/teclan-lvzaotou.pid
+...
+
+210  declare -r app_mainclass="teclan.lvzaotou.example.Main"
+
+```
+
+### shutdown.sh
+
+```
+25  PID=`cat $APP_HOME/teclan-lvzaotou.pid`
+
+```
+
+
+
 ## 创建项目
 
 1、在项目目录下创建目录 conf/,并且创建配置文件，例如 [config.conf](https://github.com/teclan/teclan-lvzaotou/blob/master/conf/config.conf)

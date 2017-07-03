@@ -1,0 +1,74 @@
+#!/bin/bash
+#
+# teclan-lvzaotou - manage teclan-lvzaotou daemon
+#
+# chkconfig: - 78 82
+# description: teclan-lvzaotou init script
+# processname: teclan-lvzaotou
+# pidfile:     $APP_HOME/bin/teclan-lvzaotou.pid
+
+. /etc/rc.d/init.d/functions
+
+TECLAN_HOME="/opt/teclan"
+APP_NAME="teclan-lvzaotou"
+APP_HOME="$TECLAN_HOME/app/$APP_NAME"
+
+export RESTAPI_ENV="production"
+
+EXEC="$APP_HOME/bin/startup.sh"
+PIDFILE="$APP_HOME/bin/$APP_NAME.pid"
+LOCKFILE="$APP_HOME/bin/$APP_NAME.lock"
+
+start () {
+    [ -x $EXEC ] || exit 5
+    echo -n $"Starting $APP_NAME"
+    daemon $EXEC
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && touch $LOCKFILE
+    return $RETVAL
+
+}
+
+stop () {
+    echo -n $"Stopping $APP_NAME"
+    killproc -p $PIDFILE $APP_NAME
+    RETVAL=$?
+    echo
+    if [ $RETVAL -eq 0 ];then
+        rm -f $LOCKFILE
+        rm -f $PIDFILE
+    fi
+    return $RETVAL
+
+}
+
+restart () {
+    stop
+    sleep 1
+    start
+
+}
+
+rh_status() {
+    status -p $PIDFILE $APP_NAME
+
+}
+
+case "$1" in
+    start)
+        $1
+        ;;
+    stop)
+        $1
+        ;;
+    restart)
+        $1
+        ;;
+    status)
+        rh_status
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|status|restart}"
+        exit 2
+esac

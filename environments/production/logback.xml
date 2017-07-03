@@ -9,10 +9,10 @@
 	</appender>
 	
 	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>log/teclan-web.log</file>
+		<file>log/teclan-lvzaotou.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<!-- daily rollover -->
-			<fileNamePattern>log/teclan-web-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+			<fileNamePattern>log/teclan-lvzaotou-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
 	
 			<!-- keep 30 days' worth of history -->
 			<maxHistory>30</maxHistory>

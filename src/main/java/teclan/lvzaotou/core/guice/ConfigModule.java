@@ -23,6 +23,13 @@ public class ConfigModule extends AbstractModule {
 
 	@Override
 	protected void configure() {
+	    
+	    File file = new File(configFile);
+	    
+	    if(!file.exists()){
+	        LOGGER.error("config file is not exists ! {}",configFile);
+	        return;
+	    }
 		Config config = ConfigFactory.parseFile(new File(configFile));
 
 		new ConfigBinder(binder()).bind(config, this.root);
